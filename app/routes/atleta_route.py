@@ -4,11 +4,10 @@ from app.models.atleta import Atleta
 from app.schemas.atleta_schema import AtletaCreate, AtletaResponse
 from app.database import get_db
 from fastapi import Query
+from sqlalchemy.exc import IntegrityError
+
 
 router = APIRouter()
-
-
-
 
 @router.get("/atletas", response_model=list[AtletaResponse])
 def get_all_atletas(
@@ -30,7 +29,14 @@ def get_all_atletas(
 def create_atleta(atleta: AtletaCreate, db: Session = Depends(get_db)):
     novo_atleta = Atleta(**atleta.dict())
     db.add(novo_atleta)
-    db.commit()
-    db.refresh(novo_atleta)
-    return novo_atleta
+    try:
+        db.commit()
+        db.refresh(novo_atleta)
+        return novo_atleta
+    except IntegrityError as e:
+        db.rollback()
+        if "UNIQUE constraint" in str(e.orig) or "duplicate key" in str(e.orig):
+            raise HTTPException(status_code=400, detail="CPF já cadastrado.")
+        raise HTTPException(status_code=500, detail="Erro ao cadastrar atleta.")
+
 
