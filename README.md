@@ -107,3 +107,8 @@ Durante o desenvolvimento, apliquei boas práticas como:
 
 ## 👩‍💻 Feito com dedicação por:
 Enaile Lopes
+
+## 🪪 Licença
+Distribuído sob a licença MIT.  
+Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
