@@ -7,20 +7,12 @@ from app.routes import atleta_route  # importa o roteador
 app = FastAPI()
 
 # Inclui as rotas definidas no atleta_route.py
-#app.include_router(atleta_route.router)
-print("Conteúdo atleta_route:", dir(atleta_route))
+app.include_router(atleta_route.router)
+#print("Conteúdo atleta_route:", dir(atleta_route))
 
 
 # Cria as tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
-
-# Dependência para obter a sessão do banco de dados
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # Rota inicial da API (opcional, mas simpática)
 @app.get("/")
