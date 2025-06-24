@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from app.models.atleta import Base, Atleta
 from app.database import engine, SessionLocal
 from app.routes import atleta_route  # importa o roteador
+from fastapi_pagination import add_pagination
 
+# Importa o FastAPI e outros módulos necessários
 app = FastAPI()
 
 # Inclui as rotas definidas no atleta_route.py
@@ -19,3 +21,5 @@ Base.metadata.create_all(bind=engine)
 def read_root():
     return {"message": "Bem-vinda à Workout API 🚴‍♀️💪"}
 
+add_pagination(app)
+# Adiciona paginação às rotas da API

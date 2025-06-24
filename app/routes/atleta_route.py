@@ -5,11 +5,32 @@ from app.schemas.atleta_schema import AtletaCreate, AtletaResponse
 from app.database import get_db
 from fastapi import Query
 from sqlalchemy.exc import IntegrityError
+from fastapi_pagination import Page, paginate
+from fastapi_pagination.paginator import paginate
+from fastapi_pagination import add_pagination
+from typing import Optional
+
 
 
 router = APIRouter()
 
-@router.get("/atletas", response_model=list[AtletaResponse])
+@router.get("/atletas", response_model=Page[AtletaResponse])
+def get_all_atletas(
+    db: Session = Depends(get_db),
+    nome: Optional[str] = Query(None),
+    cpf: Optional[str] = Query(None)
+):
+    query = db.query(Atleta)
+
+    if nome:
+        query = query.filter(Atleta.nome.ilike(f"%{nome}%"))
+    if cpf:
+        query = query.filter(Atleta.cpf == cpf)
+
+    return paginate(query)
+
+
+""" @router.get("/atletas", response_model=Page[AtletaResponse])
 def get_all_atletas(
     nome: str | None = None,
     cpf: str | None = None,
@@ -22,7 +43,7 @@ def get_all_atletas(
     if cpf:
         query = query.filter(Atleta.cpf == cpf)
 
-    return query.all()
+    return query.all() """
 
 
 @router.post("/atletas", response_model=AtletaResponse)
