@@ -2,13 +2,19 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.atleta import Base, Atleta
 from app.database import engine, SessionLocal
-from app.schemas.atleta_schema import AtletaCreate, AtletaResponse
-
+from app.routes import atleta_route  # importa o roteador
 
 app = FastAPI()
 
+# Inclui as rotas definidas no atleta_route.py
+#app.include_router(atleta_route.router)
+print("Conteúdo atleta_route:", dir(atleta_route))
+
+
+# Cria as tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
 
+# Dependência para obter a sessão do banco de dados
 def get_db():
     db = SessionLocal()
     try:
@@ -16,30 +22,8 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/atletas/", response_model=AtletaResponse)
-def criar_atleta(atleta: AtletaCreate, db: Session = Depends(get_db)):
-    db_atleta = Atleta(**atleta.dict())
-    db.add(db_atleta)
-    db.commit()
-    db.refresh(db_atleta)
-    return db_atleta
+# Rota inicial da API (opcional, mas simpática)
+@app.get("/")
+def read_root():
+    return {"message": "Bem-vinda à Workout API 🚴‍♀️💪"}
 
-@app.get("/atletas/", response_model=list[AtletaResponse])
-def listar_atletas(db: Session = Depends(get_db)):
-    return db.query(Atleta).all()
-
-@app.get("/atletas/{atleta_id}", response_model=AtletaResponse)
-def buscar_atleta(atleta_id: int, db: Session = Depends(get_db)):
-    atleta = db.query(Atleta).filter(Atleta.id == atleta_id).first()
-    if not atleta:
-        raise HTTPException(status_code=404, detail="Atleta não encontrado")
-    return atleta
-
-@app.delete("/atletas/{atleta_id}")
-def deletar_atleta(atleta_id: int, db: Session = Depends(get_db)):
-    atleta = db.query(Atleta).filter(Atleta.id == atleta_id).first()
-    if not atleta:
-        raise HTTPException(status_code=404, detail="Atleta não encontrado")
-    db.delete(atleta)
-    db.commit()
-    return {"mensagem": "Atleta deletado com sucesso"}
